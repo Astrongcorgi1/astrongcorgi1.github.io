@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon - Astrongcorgi Productions</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #181818;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+        }
+        .header {
+            position: absolute;
+            top: 24px;
+            left: 32px;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            opacity: 0.85;
+            z-index: 2;
+        }
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .gradient-text {
+            font-size: 4rem;
+            font-weight: bold;
+            letter-spacing: 4px;
+            background: linear-gradient(270deg, #ff6ec4, #7873f5, #1fd1f9, #ff6ec4);
+            background-size: 800% 800%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            animation: gradientMove 6s ease-in-out infinite;
+            text-shadow: 0 2px 24px rgba(31,209,249,0.2);
+        }
+        @keyframes gradientMove {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            min-width: 100vw;
+            min-height: 100vh;
+            max-width: 100vw;
+            max-height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="star-canvas"></canvas>
+    <div class="header">Astrongcorgi Productions</div>
+    <div class="center">
+        <span class="gradient-text">Coming Soon</span>
+    </div>
+    <script>
+    const canvas = document.getElementById('star-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.zIndex = '0';
+    canvas.style.pointerEvents = 'none';
+
+    const STAR_COUNT = 120;
+    const stars = [];
+    let mouse = { x: width/2, y: height/2 };
+
+    function random(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+            x: random(0, width),
+            y: random(0, height),
+            r: random(1, 2.5),
+            dx: random(-0.2, 0.2),
+            dy: random(-0.2, 0.2),
+            glow: random(0.5, 1.5)
+        });
+    }
+
+    function drawStars() {
+        ctx.clearRect(0, 0, width, height);
+        for (let star of stars) {
+            // Glow effect
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+            ctx.shadowColor = `rgba(255,255,255,${star.glow})`;
+            ctx.shadowBlur = 12 * star.glow;
+            ctx.fillStyle = 'white';
+            ctx.globalAlpha = 0.85;
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    function animateStars() {
+        for (let star of stars) {
+            // Move stars
+            star.x += star.dx;
+            star.y += star.dy;
+            // Wrap around screen
+            if (star.x < 0) star.x = width;
+            if (star.x > width) star.x = 0;
+            if (star.y < 0) star.y = height;
+            if (star.y > height) star.y = 0;
+            // React to mouse
+            let dist = Math.hypot(mouse.x - star.x, mouse.y - star.y);
+            if (dist < 120) {
+                let angle = Math.atan2(star.y - mouse.y, star.x - mouse.x);
+                star.x += Math.cos(angle) * 0.7;
+                star.y += Math.sin(angle) * 0.7;
+                star.glow = 1.5;
+            } else {
+                star.glow = Math.max(0.5, star.glow - 0.01);
+            }
+        }
+    }
+
+    function loop() {
+        animateStars();
+        drawStars();
+        requestAnimationFrame(loop);
+    }
+    loop();
+
+    window.addEventListener('resize', () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+    });
+    window.addEventListener('mousemove', e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+    </script>
+</body>
+</html>
